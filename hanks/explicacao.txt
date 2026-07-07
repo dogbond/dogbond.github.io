@@ -1,0 +1,7 @@
+faça o upload de hanks.html
+
+em filmesdezoofilia\hanks\hanks.html
+
+ele pede nomes ou pedaços de nomes e gera a saida completa pro cliente
+
+necessario arquivos "obrigado.txt" com a explicação de como fazer download

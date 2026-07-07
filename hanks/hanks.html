@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<title>BZ HP</title>
+
+<style>
+body { font-family: Arial, sans-serif; background: #111; color: #eee; padding: 20px; }
+h2 { margin-bottom: 10px; }
+textarea { width: 100%; height: 200px; margin-top: 10px; background: #222; color: #fff; border: 1px solid #444; padding: 10px; }
+button { margin-top: 10px; padding: 10px 15px; cursor: pointer; border: 0; background: #2d89ef; color: white; font-weight: bold; }
+#resultado { white-space: pre-wrap; margin-top: 20px; background: #1b1b1b; padding: 15px; border: 1px solid #333; }
+</style>
+</head>
+
+<body>
+
+<h2>Consulta de Compartilhados</h2>
+<p id="status">Carregando arquivos...</p>
+<textarea id="entrada" placeholder="Cole sua lista aqui..."></textarea>
+<br>
+<button onclick="gerar()">Gerar Relatório</button>
+<button onclick="copiar()">Copiar Resultado</button>
+
+<div id="resultado"></div>
+
+<script>
+
+let dados = {};
+let dadosAlt = {};
+let obrigadoTXT = "";
+
+async function carregarDadosDeArquivo(nomeArquivo) {
+    let tempDados = {};
+    const conteudo = await fetch(nomeArquivo).then(r => r.text()).catch(() => "");
+    const linhas = conteudo.split(/\r?\n/).map(l => l.trim()).filter(l => l);
+
+    for (let i = 0; i < linhas.length; i++) {
+        let match = linhas[i].match(/^(\d+)/);
+        if (match) {
+            let numero = match[1];
+            let nome = linhas[i];
+            let link = linhas[i + 1] || "";
+            tempDados[numero] = { nome, link };
+            i++;
+        }
+    }
+    return tempDados;
+}
+
+async function carregarArquivos() {
+    dados = await carregarDadosDeArquivo("compartilhados.txt");
+    dadosAlt = await carregarDadosDeArquivo("compartilhados2.txt");
+    obrigadoTXT = await fetch("obrigado.txt").then(r => r.text()).catch(() => "");
+
+    document.getElementById("status").innerText = 
+        "Carregado: " + Object.keys(dados).length + " (base 1) e " + 
+        Object.keys(dadosAlt).length + " (base 2) registros";
+}
+
+function saudacao() {
+    let h = new Date().getHours();
+    if (h < 12) return "Bom dia";
+    if (h < 18) return "Boa tarde";
+    return "Boa noite";
+}
+
+function gerar() {
+    let input = document.getElementById("entrada").value.split(/\r?\n/);
+    let encontrados = [];
+    let usados = new Set();
+    let processados = new Set();
+    
+    // 1. Identificar sorteado ANTES de gerar o texto, para garantir que seja o mesmo
+    let sorteadoNum = null;
+    let baseEncontrada = []; // IDs que o usuário pediu
+
+    for (let linha of input) {
+        let match = linha.match(/^(\d+)/);
+        if (match) baseEncontrada.push(match[1]);
+    }
+    
+    // Remove duplicados da entrada para validar regra de brinde
+    let unicosEncontrados = [...new Set(baseEncontrada)];
+    if (unicosEncontrados.length > 7) {
+        let disponiveis = Object.keys(dados).filter(k => !unicosEncontrados.includes(k));
+        if (disponiveis.length > 0) {
+            sorteadoNum = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+        }
+    }
+
+    // 2. Construir Texto Principal
+    let out = saudacao() + "\n\nObrigado por ter comprado, seguem links: \n\n";
+    for (let linha of input) {
+        let match = linha.match(/^(\d+)/);
+        if (!match) continue;
+        let num = match[1];
+        if (dados[num] && !processados.has(num)) {
+            out += dados[num].nome + "\n" + dados[num].link + "\n\n";
+            processados.add(num);
+        }
+    }
+    
+    // Adicionar brinde na seção principal
+    if (sorteadoNum && dados[sorteadoNum]) {
+        out += "brinde " + dados[sorteadoNum].nome + "\n" + dados[sorteadoNum].link + "\n\n";
+    }
+
+    // 3. Construir Links Alternativos
+    out += "__________________\n\nLinks Alternativos:\n";
+    let processadosAlt = new Set(); 
+    for (let linha of input) {
+        let match = linha.match(/^(\d+)/);
+        if (!match) continue;
+        let num = match[1];
+        if (dadosAlt[num] && !processadosAlt.has(num)) {
+            out += dadosAlt[num].nome + "\n" + dadosAlt[num].link + "\n\n";
+            processadosAlt.add(num);
+        }
+    }
+    
+    // Adicionar brinde na seção alternativa (se existir no dadosAlt)
+    if (sorteadoNum && dadosAlt[sorteadoNum]) {
+        out += "brinde " + dadosAlt[sorteadoNum].nome + "\n" + dadosAlt[sorteadoNum].link + "\n\n";
+    }
+
+    out += obrigadoTXT;
+    document.getElementById("resultado").innerText = out;
+}
+
+function copiar() {
+    let texto = document.getElementById("resultado").innerText;
+    navigator.clipboard.writeText(texto);
+    alert("Copiado!");
+}
+
+carregarArquivos();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+
+
+Saudações
+BZ HP
+
+----------------------------------
+
+Clique no link desejado e Aguarde a página carregar.
+
+
+1)Assistir online sem baixar (basta clicar em cima do video)
+(caso seu celular ou pc não conseguir assistir online vá para o item 2)
+
+2)Para baixar 
+(clique no botão "baixar video"))
+ Certifique-se de que o vídeo foi baixado completamente.
+Se o download parar antes de terminar, ele não irá reproduzir.
+
+ 
+Seu celular ou pc não consegue tocar , após baixar? instale os apps :
+
+💡Baixe o VLC caso o PC /notebook ou celular não tenha ele instalado).
+
+VLC para Android:
+https://play.google.com/store/apps/details?id=org.videolan.vlc&hl=pt_BR
+
+VlC para Iphone Apple
+https://apps.apple.com/br/app/vlc-media-player/id650377962
+
+VLC para Windows
+https://www.videolan.org/
+
+
+
+
+🛠️ Problemas Comuns e Soluções
+
+    Filme sem som ou imagem no pc/notebook?
+    Instale os codecs:
+    https://codecguide.com/download_kl.htm
+
+    Download travando ou lento?
+    O site pode estar em manutenção. Aguarde e tente novamente mais tarde.
+
+    Mensagem de “Limite de downloads atingido”? ou "Link Expirado?"
+    Entre em contato para receber novos links.
+
+    Firefox não consegue iniciar o download?
+    Use outro navegador (como Chrome ou Edge) ou limpe o cache do Firefox.

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<title>BZ HP</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #eee;
+    padding: 20px;
+}
+
+h2 {
+    margin-bottom: 10px;
+}
+
+textarea {
+    width: 100%;
+    height: 200px;
+    margin-top: 10px;
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 10px;
+}
+
+button {
+    margin-top: 10px;
+    padding: 10px 15px;
+    cursor: pointer;
+    border: 0;
+    background: #2d89ef;
+    color: white;
+    font-weight: bold;
+}
+
+#resultado {
+    white-space: pre-wrap;
+    margin-top: 20px;
+    background: #1b1b1b;
+    padding: 15px;
+    border: 1px solid #333;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Consulta de Compartilhados</h2>
+
+<p id="status">Carregando arquivos...</p>
+
+<textarea id="entrada" placeholder="Cole sua lista aqui..."></textarea>
+
+<br>
+<button onclick="gerar()">Gerar Relatório</button>
+<button onclick="copiar()">Copiar Resultado</button>
+
+<div id="resultado"></div>
+
+<script>
+
+let dados = {};
+let obrigadoTXT = "";
+
+// carrega dados
+async function carregarArquivos() {
+
+    const comp = await fetch("compartilhados.txt").then(r => r.text());
+    const obg = await fetch("obrigado.txt").then(r => r.text());
+
+    obrigadoTXT = obg;
+
+    const linhas = comp.split(/\r?\n/).map(l => l.trim()).filter(l => l);
+
+    for (let i = 0; i < linhas.length; i++) {
+
+        let match = linhas[i].match(/^(\d+)/);
+
+        if (match) {
+            let numero = match[1];
+            let nome = linhas[i];
+            let link = linhas[i + 1] || "";
+            dados[numero] = { nome, link };
+            i++;
+        }
+    }
+
+    document.getElementById("status").innerText =
+        "Carregado: " + Object.keys(dados).length + " registros";
+}
+
+function saudacao() {
+    let h = new Date().getHours();
+
+    if (h < 12) return "Bom dia";
+    if (h < 18) return "Boa tarde";
+    return "Boa noite";
+}
+
+function gerar() {
+
+    let input = document.getElementById("entrada").value.split(/\r?\n/);
+
+    let out = "";
+
+    let encontrados = [];
+    let usados = new Set();
+
+    out += saudacao() + "\n\n";
+    out += "Obrigado por ter comprado\n\n";
+
+    for (let linha of input) {
+
+        let match = linha.match(/^(\d+)/);
+        if (!match) continue;
+
+        let num = match[1];
+
+        if (dados[num]) {
+            out += dados[num].nome + "\n";
+            out += dados[num].link + "\n\n";
+
+            encontrados.push(num);
+            usados.add(num);
+
+        } else {
+            out += num + " -> NÃO ENCONTRADO\n\n";
+        }
+    }
+
+    // 🎁 REGRA DO BRINDE
+    if (encontrados.length > 7) {
+
+        let disponiveis = Object.keys(dados).filter(k => !usados.has(k));
+
+        if (disponiveis.length > 0) {
+
+            let sorteado = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+
+            out += "brinde " + dados[sorteado].nome + "\n";
+            out += dados[sorteado].link + "\n\n";
+        }
+    }
+
+    out += obrigadoTXT;
+
+    document.getElementById("resultado").innerText = out;
+}
+
+function copiar() {
+    let texto = document.getElementById("resultado").innerText;
+    navigator.clipboard.writeText(texto);
+    alert("Copiado!");
+}
+
+carregarArquivos();
+
+</script>
+
+</body>
+</html>
